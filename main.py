@@ -14,10 +14,17 @@ import plotly.express as px
 import pandas as pd
 
 
-nltk.download('punkt')
-nltk.download('cmudict')
-nltk.download('vader_lexicon')
-nltk.download('wordnet')
+# Download required NLTK data
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/cmudict')
+    nltk.data.find('sentiment/vader_lexicon')
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('punkt')
+    nltk.download('cmudict')
+    nltk.download('vader_lexicon')
+    nltk.download('wordnet')
 
 
 @dataclass
@@ -480,6 +487,8 @@ def create_comparison_chart(slogans: List[Dict]):
 def main():
     st.set_page_config(layout="wide")
     st.title("Slogan Generator")
+
+    # Sidebar for model loading and filters
 
     # Initialize slogan generator
     generator = EnhancedSloganGenerator()
