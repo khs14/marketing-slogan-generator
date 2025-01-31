@@ -6,9 +6,7 @@ import nltk
 from dataclasses import dataclass
 from typing import List, Dict, Set
 import tensorflow as tf
-from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 import numpy as np
-from collections import defaultdict
 import re
 import random
 import plotly.graph_objects as go
@@ -27,29 +25,6 @@ except LookupError:
     nltk.download('cmudict')
     nltk.download('vader_lexicon')
     nltk.download('wordnet')
-
-# Reuse your existing classes
-
-
-@dataclass
-class SloganMetrics:
-    memorability: float
-    emotional_impact: float
-    brand_relevance: float
-    originality: float
-    rhythm_score: float
-    clarity: float
-    overall_score: float
-
-# Import your existing classes (RhymeAnalyzer and EnhancedSloganGenerator)
-# [Previous class definitions remain the same]
-
-
-# Download required NLTK data
-nltk.download('cmudict')
-nltk.download('punkt')
-nltk.download('vader_lexicon')
-nltk.download('wordnet')
 
 
 @dataclass
@@ -446,21 +421,6 @@ def get_tone_patterns():
     }
 
 
-def check_offensive_content(text: str, model, tokenizer) -> Dict:
-    """Check if the text contains offensive content"""
-    inputs = tokenizer(text, return_tensors="tf",
-                       truncation=True, padding=True, max_length=128)
-    outputs = model(inputs.input_ids)
-    probs = tf.nn.softmax(outputs.logits, axis=-1).numpy()[0]
-    predicted_class = np.argmax(probs)
-    confidence_score = probs[predicted_class]
-
-    return {
-        "is_offensive": bool(predicted_class),
-        "confidence": float(confidence_score)
-    }
-
-
 def create_metrics_sunburst(metrics: SloganMetrics):
     """Create a sunburst chart for metrics visualization"""
     metrics_dict = {k: v for k, v in metrics.__dict__.items()
@@ -526,24 +486,7 @@ def create_comparison_chart(slogans: List[Dict]):
 
 def main():
     st.set_page_config(layout="wide")
-    st.title("AI Slogan Generator with Tone Control")
-
-    # Sidebar for model loading and filters
-    with st.sidebar:
-        st.header("Model Status")
-        model_load_state = st.text(
-            "Loading offensive content detection model...")
-
-        try:
-            model_path = "./offensive_roberta_model"
-            tokenizer = AutoTokenizer.from_pretrained(model_path)
-            model = TFAutoModelForSequenceClassification.from_pretrained(
-                model_path)
-            model_load_state.text("✅ Model loaded successfully!")
-        except Exception as e:
-            model_load_state.text("❌ Error loading model")
-            st.error(f"Error: {str(e)}")
-            return
+    st.title("Slogan Generator")
 
     # Initialize slogan generator
     generator = EnhancedSloganGenerator()
@@ -647,12 +590,6 @@ def main():
         }
         with st.spinner("Generating slogans..."):
             slogans = generator.generate_slogans(brand_context, num_slogans)
-
-            for result in slogans:
-                slogan = result['slogan']
-                offensive_check = check_offensive_content(
-                    slogan, model, tokenizer)
-                result['offensive_check'] = offensive_check
 
         # Create tabs for different views
         tab1, tab2 = st.tabs(["Individual Slogans", "Comparative Analysis"])
