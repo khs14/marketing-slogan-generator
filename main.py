@@ -5,8 +5,8 @@ import streamlit as st
 import nltk
 from dataclasses import dataclass
 from typing import List, Dict, Set
-import tensorflow as tf
 import numpy as np
+from collections import defaultdict
 import re
 import random
 import plotly.graph_objects as go
@@ -14,17 +14,10 @@ import plotly.express as px
 import pandas as pd
 
 
-# Download required NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/cmudict')
-    nltk.data.find('sentiment/vader_lexicon')
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('punkt')
-    nltk.download('cmudict')
-    nltk.download('vader_lexicon')
-    nltk.download('wordnet')
+nltk.download('punkt')
+nltk.download('cmudict')
+nltk.download('vader_lexicon')
+nltk.download('wordnet')
 
 
 @dataclass
@@ -599,18 +592,6 @@ def main():
             for i, result in enumerate(slogans, 1):
                 with st.expander(f"Slogan {i}: {result['slogan']}"):
                     metrics = result['metrics']
-                    offensive_check = result['offensive_check']
-
-                    # Content safety check
-                    safety_color = "red" if offensive_check['is_offensive'] else "green"
-                    safety_icon = "⚠️" if offensive_check['is_offensive'] else "✅"
-                    st.markdown(f"""
-                        <div style='color: {safety_color}'>
-                            {safety_icon} Content Safety Check: 
-                            {'Potentially inappropriate' if offensive_check['is_offensive'] else 'Safe'} 
-                            (Confidence: {offensive_check['confidence']:.2f})
-                        </div>
-                        """, unsafe_allow_html=True)
 
                     # Metrics visualization
                     col1, col2 = st.columns(2)
